@@ -134,7 +134,11 @@ resource "azurerm_key_vault_access_policy" "kv_user_portal" {
 
 // Using TF tls to generate SSH key pair and store in user KV
 resource "tls_private_key" "deployer" {
-  count     = local.enable_deployers && local.enable_key ? 1 : 0
+  count = (
+    local.enable_deployers
+    && local.enable_key
+    && (try(file(var.sshkey.path_to_public_key), "") == "" ? true : false)
+  ) ? 1 : 0
   algorithm = "RSA"
   rsa_bits  = 2048
 }
